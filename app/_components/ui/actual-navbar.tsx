@@ -46,6 +46,12 @@ const NavbarLinks = [
     target: "_self",
   },
   {
+    id: "vaults",
+    label: "Vaults",
+    link: "/vaults",
+    target: "_self",
+  },
+  {
     id: "portfolio",
     label: "Portfolio",
     link: "/portfolio",
