@@ -2,7 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { MobileMenu, SearchBar, TableMenu } from "../explore/_components";
+import { MobileMenu, SearchBar } from "../explore/_components";
 import "../explore/local.css";
 
 import { ColumnToggler, Sorter } from "../explore/_components/ui";
@@ -11,6 +11,7 @@ import { Protector } from "../protector";
 import { MAX_SCREEN_WIDTH } from "@/components/constants";
 import { VaultsTable } from "./_components/vaults-table";
 import { VaultStats } from "./_components/vault-stats";
+import { VaultTableMenu } from "./_components/vault-table-menu";
 
 const Page = () => {
   const Content = () => {
@@ -53,7 +54,7 @@ const Page = () => {
             }}
             className="hidden w-3/12 md:max-h-[80vh] lg:block"
           >
-            <TableMenu />
+            <VaultTableMenu />
           </div>
 
           <div className="flex w-full shrink-0 flex-col gap-3 lg:w-9/12">
