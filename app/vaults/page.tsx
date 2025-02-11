@@ -12,7 +12,7 @@ import { MAX_SCREEN_WIDTH } from "@/components/constants";
 import { VaultsTable } from "./_components/vaults-table";
 import { VaultStats } from "./_components/vault-stats";
 import { VaultTableMenu } from "./_components/vault-table-menu";
-
+import { VaultPagination } from "./_components/vault-pagination";
 const Page = () => {
   const Content = () => {
     return (
@@ -85,7 +85,7 @@ const Page = () => {
 
             <VaultsTable />
 
-            <Pagination />
+            <VaultPagination />
           </div>
         </div>
 
