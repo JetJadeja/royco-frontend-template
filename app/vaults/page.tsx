@@ -2,12 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import {
-  MobileMenu,
-  SearchBar,
-  RoycoStats,
-  TableMenu,
-} from "../explore/_components";
+import { MobileMenu, SearchBar, TableMenu } from "../explore/_components";
 import "../explore/local.css";
 
 import { ColumnToggler, Sorter } from "../explore/_components/ui";
@@ -15,6 +10,7 @@ import { Pagination } from "../explore/_components/pagination";
 import { Protector } from "../protector";
 import { MAX_SCREEN_WIDTH } from "@/components/constants";
 import { VaultsTable } from "./_components/vaults-table";
+import { VaultStats } from "./_components/vault-stats";
 
 const Page = () => {
   const Content = () => {
@@ -39,7 +35,7 @@ const Page = () => {
             </div>
           </div>
 
-          <RoycoStats className="flex-1" />
+          <VaultStats className="flex-1" />
         </div>
 
         <div
