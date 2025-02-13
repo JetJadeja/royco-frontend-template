@@ -5,7 +5,9 @@ import { useVaults } from "royco/hooks";
 import { LoadingSpinner } from "@/components/composables";
 
 import { getSupportedToken } from "royco/constants";
+import { getSupportedChain } from "royco/utils";
 import { TokenDisplayer } from "@/components/common";
+import { M_PLUS_1 } from "next/font/google";
 
 /**
  * Formats a number to a compact string with K/M/B suffix
@@ -94,6 +96,9 @@ export const VaultsTable = () => {
           capacity,
         } = vault;
 
+        // Get chain information
+        const chain = getSupportedChain(chain_id);
+
         // Format TVL value as a number
         const tvlValue = tvl ? parseFloat(tvl) : 0;
         const formattedTVL = tvlValue ? formatCompactNumber(tvlValue) : "0";
@@ -124,8 +129,10 @@ export const VaultsTable = () => {
               <div className="flex items-center gap-2">
                 {/* Chain Badge */}
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-white px-3 py-1.5 shadow-sm">
-                  <span className="h-5 w-5 rounded-full bg-[#627EEA]" />
-                  <span className="text-sm font-light text-gray-700">ETH</span>
+                  <TokenDisplayer tokens={[chain]} size={5} symbols={false} />
+                  <span className="text-sm font-light text-gray-700">
+                    {chain?.symbol || "Unknown"}
+                  </span>
                 </div>
 
                 {/* VEDA Badge */}
@@ -175,9 +182,10 @@ export const VaultsTable = () => {
                   <div className="flex flex-wrap gap-1">
                     {reward_assets?.length > 0 && (
                       <TokenDisplayer
-                        tokens={reward_assets.map((tokenId: string) =>
-                          getSupportedToken(tokenId)
-                        )}
+                        tokens={reward_assets.map((tokenId: string) => ({
+                          id: 1,
+                          ...getSupportedToken(tokenId),
+                        }))}
                         symbols={false}
                         hover
                         bounce
