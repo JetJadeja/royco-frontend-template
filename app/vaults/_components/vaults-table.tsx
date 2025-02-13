@@ -4,6 +4,32 @@ import React from "react";
 import { useVaults } from "royco/hooks";
 import { LoadingSpinner } from "@/components/composables";
 
+import { getSupportedToken } from "royco/constants";
+import { TokenDisplayer } from "@/components/common";
+
+/**
+ * Formats a number to a compact string with K/M/B suffix
+ * e.g., 1234 -> 1.2K, 1234567 -> 1.2M, 1234567890 -> 1.2B
+ */
+const formatCompactNumber = (value: number): string => {
+  const formatter = Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 0,
+  });
+
+  // Format the number using the formatter
+  let formatted = formatter.format(value);
+
+  // Convert the notation to uppercase (k -> K, m -> M, b -> B)
+  formatted = formatted
+    .replace(/k/i, "K")
+    .replace(/m/i, "M")
+    .replace(/b/i, "B");
+
+  return formatted;
+};
+
 /**
  * Displays vault data in a multi-column card format,
  * matching a design that shows:
@@ -51,11 +77,10 @@ export const VaultsTable = () => {
     );
   }
 
-  // For demonstration, limit display to the first 9 vaults
   const displayedVaults = vaults.slice(0, 9);
 
   return (
-    <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid w-full grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
       {displayedVaults.map((vault: any) => {
         const {
           id,
@@ -66,101 +91,121 @@ export const VaultsTable = () => {
           tvl,
           reward_assets = [],
           active,
-          capacity = 500000, // for demonstration
+          capacity,
         } = vault;
 
-        // For capacity usage demo
-        const usedCapacityPercent = 88; // placeholder, or calculate from vault data
-        const capacityDisplay = `${usedCapacityPercent}% Full`;
+        // Format TVL value as a number
+        const tvlValue = tvl ? parseFloat(tvl) : 0;
+        const formattedTVL = tvlValue ? formatCompactNumber(tvlValue) : "0";
+
+        // Calculate used capacity percent based on TVL / capacity (maxing out at 100%)
+        let usedCapacityPercent = 0;
+        if (capacity && parseFloat(capacity) > 0) {
+          usedCapacityPercent = Math.min(
+            (tvlValue / parseFloat(capacity)) * 100,
+            100
+          );
+        }
+        const capacityDisplay = `${usedCapacityPercent.toFixed(0)}% Full`;
 
         return (
           <div
             key={id}
-            className="flex flex-col rounded-xl border border-divider bg-white p-4 shadow-sm"
+            className="flex min-h-[240px] flex-col overflow-hidden rounded-xl border border-gray-200/50 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
           >
-            {/* Top row: Name, chain, partner, TVL */}
-            <div className="flex flex-col">
-              <div className="text-lg font-semibold text-black">
+            {/* Title and Badges Container */}
+            <div className="space-y-4">
+              {/* Title */}
+              <h3 className="text-xl leading-tight text-gray-900">
                 {name || `Vault #${id}`}
-              </div>
+              </h3>
 
-              <div className="mt-2 flex flex-row flex-wrap items-center gap-2 text-sm text-secondary">
-                {/* Chain label (placeholder - "ETH") */}
-                <div className="flex items-center rounded-full border border-divider px-2 py-1">
-                  ETH
+              {/* Badges row */}
+              <div className="flex items-center gap-2">
+                {/* Chain Badge */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-white px-3 py-1.5 shadow-sm">
+                  <span className="h-5 w-5 rounded-full bg-[#627EEA]" />
+                  <span className="text-sm font-light text-gray-700">ETH</span>
                 </div>
 
-                {/* Partner label */}
-                <div className="flex items-center rounded-full border border-divider px-2 py-1">
-                  {partner || "Unknown"}
+                {/* VEDA Badge */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-white px-3 py-1.5 shadow-sm">
+                  <span className="text-base">🔒</span>
+                  <span className="text-sm font-light text-gray-700">VEDA</span>
                 </div>
 
-                {/* TVL */}
-                <div className="flex items-center rounded-full border border-divider px-2 py-1">
-                  {tvl
-                    ? `$${parseFloat(tvl).toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                      })} TVL`
-                    : "$0 TVL"}
+                {/* TVL Badge */}
+                <div className="inline-flex items-center rounded-full border border-gray-200/80 bg-white px-3 py-1.5 shadow-sm">
+                  <span className="text-sm font-light text-gray-700">
+                    ${formattedTVL} TVL
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Middle section: APY on left, Rewards on right */}
-            <div className="mt-4 flex flex-row items-stretch justify-between gap-4">
-              {/* APY card */}
-              <div className="flex grow flex-col rounded-md border border-divider bg-[#FBFBF8] p-4">
-                <div className="flex flex-row items-center justify-between text-secondary">
-                  <span className="text-xs font-medium">APY</span>
-                  {/* Info icon, if desired */}
+            {/* APY and Rewards Section */}
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {/* APY Card */}
+              <div className="flex flex-col rounded-lg border border-gray-200/80 bg-[#FBFBF8] p-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">APY</span>
+                  <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
+                    i
+                  </div>
                 </div>
-                <div className="mt-1 text-3xl font-bold text-black">
+                <div className="text-[2rem] font-medium leading-tight text-gray-900">
                   {apy ? `${parseFloat(apy).toFixed(2)}%` : "0%"}
                 </div>
               </div>
 
-              {/* Rewards card */}
-              <div className="flex grow flex-col rounded-md border border-divider bg-[#FBFBF8] p-4">
-                <div className="flex flex-row items-center justify-between text-secondary">
-                  <span className="text-xs font-medium">Rewards</span>
-                  {/* Info icon, if desired */}
+              {/* Rewards Card */}
+              <div className="flex flex-col rounded-lg border border-gray-200/80 bg-[#FBFBF8] p-4">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">
+                    Rewards
+                  </span>
+                  <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
+                    i
+                  </div>
                 </div>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {reward_assets.length > 0
-                    ? reward_assets.map((asset: string, index: number) => (
-                        <div
-                          key={index}
-                          className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-600"
-                        >
-                          {asset}
-                        </div>
-                      ))
-                    : "--"}
+                <div className="flex flex-wrap gap-1">
+                  {reward_assets?.length > 0 && (
+                    <TokenDisplayer
+                      tokens={reward_assets.map((tokenId: string) =>
+                        getSupportedToken(tokenId)
+                      )}
+                      symbols={false}
+                      hover
+                      bounce
+                      size={5}
+                    />
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Bottom row: capacity usage, active status */}
-            <div className="mt-4 flex flex-row items-center justify-between border-t border-divider pt-3 text-sm text-secondary">
-              {/* Capacity bar + text */}
-              <div className="flex flex-row items-center space-x-3">
-                <div className="relative h-2 w-24 rounded-full bg-gray-200">
+            {/* Status Bar */}
+            <div className="mt-auto flex items-center justify-between border-t border-gray-200/80 pt-3">
+              <div className="flex items-center gap-2">
+                <div className="relative h-1.5 w-24 overflow-hidden rounded-full bg-gray-200">
                   <div
-                    className="absolute left-0 top-0 h-full rounded-full bg-gray-500"
+                    className="absolute left-0 top-0 h-full rounded-full bg-gray-400"
                     style={{ width: `${usedCapacityPercent}%` }}
                   />
                 </div>
-                <div className="text-black">{capacityDisplay}</div>
+                <span className="text-xs font-medium text-gray-500">
+                  {capacityDisplay}
+                </span>
               </div>
-
-              {/* Active or not */}
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-1.5">
                 <div
-                  className={`h-2 w-2 rounded-full ${
+                  className={`h-1.5 w-1.5 rounded-full ${
                     active ? "bg-green-500" : "bg-gray-400"
                   }`}
                 />
-                <span className="text-black">{active ? "Active" : "Inactive"}</span>
+                <span className="text-xs font-medium text-gray-500">
+                  {active ? "Active" : "Inactive"}
+                </span>
               </div>
             </div>
           </div>
