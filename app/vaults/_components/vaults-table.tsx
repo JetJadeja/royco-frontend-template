@@ -5,8 +5,8 @@ import { useVaults } from "royco/hooks";
 import { LoadingSpinner } from "@/components/composables";
 
 /**
- * Displays vault data in 3-column card format (3 rows per page, total 9 vaults).
- * Each card shows title, base asset, tvl, manager, capacity, active status (or placeholders).
+ * Displays vault data in 3-column card format.
+ * Each card shows all relevant new columns from the updated table schema.
  */
 export const VaultsTable = () => {
   // Example: you might pass in additional filter/sort/search states here
@@ -15,12 +15,12 @@ export const VaultsTable = () => {
     isLoading,
     isError,
     error,
-    count,
   } = useVaults({
-    chain_id: "", // or a default chain ID value
+    // Provide whatever filters/sorting/pagination you need
+    chain_id: undefined,
     page_index: 0,
     page_size: 20,
-    search_key: "", // adjust as needed
+    search_key: "",
     enabled: true,
   });
 
@@ -50,7 +50,7 @@ export const VaultsTable = () => {
     );
   }
 
-  // For demonstration, limit display to 9 vaults (3 rows * 3 columns)
+  // For demonstration, limit display to first 9 vaults
   const displayedVaults = vaults.slice(0, 9);
 
   return (
@@ -58,13 +58,19 @@ export const VaultsTable = () => {
       {displayedVaults.map((vault: any) => {
         const {
           id,
+          chain_id,
           name,
-          title,
+          owner,
+          partner,
           base_asset,
-          tvl_usd,
-          manager,
-          capacity_usage,
+          apy,
+          tvl,
+          reward_assets,
           active,
+          capacity,
+          accepted_asset,
+          underlying_contract,
+          fee_structure,
         } = vault;
 
         return (
@@ -72,28 +78,70 @@ export const VaultsTable = () => {
             key={id}
             className="rounded-md border border-divider bg-white p-4 shadow-sm"
           >
-            <div className="text-base font-semibold">
-              {title || name || `Vault #${id}`}
+            <div className="mb-2 text-base font-semibold">
+              {name || `Vault #${id}`}
+            </div>
+            <div className="text-sm text-secondary">
+              <span className="font-medium">Chain ID:</span> {chain_id || "N/A"}
+            </div>
+            <div className="text-sm text-secondary">
+              <span className="font-medium">Owner:</span> {owner || "N/A"}
+            </div>
+            <div className="text-sm text-secondary">
+              <span className="font-medium">Partner:</span> {partner || "N/A"}
             </div>
             <div className="mt-2 text-sm text-secondary">
-              Base Asset: {base_asset || "Unknown Asset"}
+              <span className="font-medium">Base Asset:</span>{" "}
+              {base_asset || "Unknown"}
             </div>
             <div className="mt-1 text-sm text-secondary">
-              TVL:{" "}
-              {tvl_usd
-                ? `$${tvl_usd.toLocaleString(undefined, {
+              <span className="font-medium">APY:</span> {apy ? `${apy}%` : "0%"}
+            </div>
+            <div className="mt-1 text-sm text-secondary">
+              <span className="font-medium">TVL:</span>{" "}
+              {tvl
+                ? `$${parseFloat(tvl).toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}`
                 : "--"}
             </div>
             <div className="mt-1 text-sm text-secondary">
-              Manager: {manager || "Unknown Manager"}
+              <span className="font-medium">Active:</span>{" "}
+              {active ? "Yes" : "No"}
             </div>
             <div className="mt-1 text-sm text-secondary">
-              Capacity: {capacity_usage || "N/A"}
+              <span className="font-medium">Capacity:</span>{" "}
+              {capacity
+                ? `$${parseFloat(capacity).toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}`
+                : "--"}
             </div>
             <div className="mt-1 text-sm text-secondary">
-              Active: {active ? "Active" : "Inactive"}
+              <span className="font-medium">Accepted Asset:</span>{" "}
+              {accepted_asset || "--"}
+            </div>
+            <div className="mt-1 text-sm text-secondary">
+              <span className="font-medium">Underlying Contract:</span>{" "}
+              {underlying_contract || "--"}
+            </div>
+            <div className="mt-1 text-sm text-secondary">
+              <span className="font-medium">Reward Assets:</span>{" "}
+              {reward_assets && reward_assets.length > 0
+                ? reward_assets.join(", ")
+                : "--"}
+            </div>
+            <div className="mt-1 text-sm text-secondary">
+              <span className="font-medium">Fee Structure:</span>{" "}
+              {fee_structure && fee_structure.length > 0
+                ? fee_structure
+                    .map((feeObj: any) => {
+                      const mgmt = feeObj.management_fee || "N/A";
+                      const perf = feeObj.performance_fee || "N/A";
+                      return `Mgmt: ${mgmt}, Perf: ${perf}`;
+                    })
+                    .join(" | ")
+                : "--"}
             </div>
           </div>
         );
