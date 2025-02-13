@@ -143,69 +143,77 @@ export const VaultsTable = () => {
               </div>
             </div>
 
-            {/* APY and Rewards Section */}
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              {/* APY Card */}
-              <div className="flex flex-col rounded-lg border border-gray-200/80 bg-[#FBFBF8] p-4">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600">APY</span>
-                  <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
-                    i
+            {/* Combined Stats Container */}
+            <div className="mt-6 flex grow flex-col overflow-hidden rounded-lg border border-gray-200/80 bg-[#FBFBF8]">
+              {/* Top row with APY and Rewards */}
+              <div className="grid grid-cols-2 divide-x divide-gray-200/80">
+                {/* APY Section */}
+                <div className="flex flex-col p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      APY
+                    </span>
+                    <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
+                      i
+                    </div>
+                  </div>
+                  <div className="text-[2rem] font-medium leading-tight text-gray-900">
+                    {apy ? `${parseFloat(apy).toFixed(2)}%` : "0%"}
                   </div>
                 </div>
-                <div className="text-[2rem] font-medium leading-tight text-gray-900">
-                  {apy ? `${parseFloat(apy).toFixed(2)}%` : "0%"}
+
+                {/* Rewards Section */}
+                <div className="flex flex-col p-4">
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      Rewards
+                    </span>
+                    <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
+                      i
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {reward_assets?.length > 0 && (
+                      <TokenDisplayer
+                        tokens={reward_assets.map((tokenId: string) =>
+                          getSupportedToken(tokenId)
+                        )}
+                        symbols={false}
+                        hover
+                        bounce
+                        size={5}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Rewards Card */}
-              <div className="flex flex-col rounded-lg border border-gray-200/80 bg-[#FBFBF8] p-4">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    Rewards
-                  </span>
-                  <div className="h-4 w-4 rounded-full border border-gray-300 text-center text-[10px] leading-4 text-gray-400">
-                    i
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {reward_assets?.length > 0 && (
-                    <TokenDisplayer
-                      tokens={reward_assets.map((tokenId: string) =>
-                        getSupportedToken(tokenId)
-                      )}
-                      symbols={false}
-                      hover
-                      bounce
-                      size={5}
+              {/* Bottom Status Section */}
+              <div className="flex items-center divide-x divide-gray-200/80 border-t border-gray-200/80">
+                {/* Progress bar section */}
+                <div className="flex grow items-center gap-3 p-3">
+                  <div className="relative h-1.5 w-32 overflow-hidden rounded-full bg-gray-200">
+                    <div
+                      className="absolute left-0 top-0 h-full rounded-full bg-gray-400"
+                      style={{ width: `${usedCapacityPercent}%` }}
                     />
-                  )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-500">
+                    {capacityDisplay}
+                  </span>
                 </div>
-              </div>
-            </div>
 
-            {/* Status Bar */}
-            <div className="mt-auto flex items-center justify-between border-t border-gray-200/80 pt-3">
-              <div className="flex items-center gap-2">
-                <div className="relative h-1.5 w-24 overflow-hidden rounded-full bg-gray-200">
+                {/* Active status section */}
+                <div className="flex items-center gap-2 px-4">
                   <div
-                    className="absolute left-0 top-0 h-full rounded-full bg-gray-400"
-                    style={{ width: `${usedCapacityPercent}%` }}
+                    className={`h-2 w-2 rounded-full ${
+                      active ? "bg-green-500" : "bg-gray-400"
+                    }`}
                   />
+                  <span className="text-sm font-medium text-gray-500">
+                    {active ? "Active" : "Inactive"}
+                  </span>
                 </div>
-                <span className="text-xs font-medium text-gray-500">
-                  {capacityDisplay}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    active ? "bg-green-500" : "bg-gray-400"
-                  }`}
-                />
-                <span className="text-xs font-medium text-gray-500">
-                  {active ? "Active" : "Inactive"}
-                </span>
               </div>
             </div>
           </div>
