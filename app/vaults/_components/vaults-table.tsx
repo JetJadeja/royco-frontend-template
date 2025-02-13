@@ -5,18 +5,19 @@ import { useVaults } from "royco/hooks";
 import { LoadingSpinner } from "@/components/composables";
 
 /**
- * Displays vault data in 3-column card format.
- * Each card shows all relevant new columns from the updated table schema.
+ * Displays vault data in a multi-column card format,
+ * matching a design that shows:
+ * - Vault name, chain label, partner label, TVL in top row
+ * - APY on the left, Rewards on the right
+ * - Capacity usage bar, capacity text, and active state in bottom row
  */
 export const VaultsTable = () => {
-  // Example: you might pass in additional filter/sort/search states here
   const {
     data: vaults,
     isLoading,
     isError,
     error,
   } = useVaults({
-    // Provide whatever filters/sorting/pagination you need
     chain_id: undefined,
     page_index: 0,
     page_size: 20,
@@ -50,7 +51,7 @@ export const VaultsTable = () => {
     );
   }
 
-  // For demonstration, limit display to first 9 vaults
+  // For demonstration, limit display to the first 9 vaults
   const displayedVaults = vaults.slice(0, 9);
 
   return (
@@ -60,88 +61,107 @@ export const VaultsTable = () => {
           id,
           chain_id,
           name,
-          owner,
           partner,
-          base_asset,
           apy,
           tvl,
-          reward_assets,
+          reward_assets = [],
           active,
-          capacity,
-          accepted_asset,
-          underlying_contract,
-          fee_structure,
+          capacity = 500000, // for demonstration
         } = vault;
+
+        // For capacity usage demo
+        const usedCapacityPercent = 88; // placeholder, or calculate from vault data
+        const capacityDisplay = `${usedCapacityPercent}% Full`;
 
         return (
           <div
             key={id}
-            className="rounded-md border border-divider bg-white p-4 shadow-sm"
+            className="flex flex-col rounded-xl border border-divider bg-white p-4 shadow-sm"
           >
-            <div className="mb-2 text-base font-semibold">
-              {name || `Vault #${id}`}
+            {/* Top row: Name, chain, partner, TVL */}
+            <div className="flex flex-col">
+              <div className="text-lg font-semibold text-black">
+                {name || `Vault #${id}`}
+              </div>
+
+              <div className="mt-2 flex flex-row flex-wrap items-center gap-2 text-sm text-secondary">
+                {/* Chain label (placeholder - "ETH") */}
+                <div className="flex items-center rounded-full border border-divider px-2 py-1">
+                  ETH
+                </div>
+
+                {/* Partner label */}
+                <div className="flex items-center rounded-full border border-divider px-2 py-1">
+                  {partner || "Unknown"}
+                </div>
+
+                {/* TVL */}
+                <div className="flex items-center rounded-full border border-divider px-2 py-1">
+                  {tvl
+                    ? `$${parseFloat(tvl).toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                      })} TVL`
+                    : "$0 TVL"}
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-secondary">
-              <span className="font-medium">Chain ID:</span> {chain_id || "N/A"}
+
+            {/* Middle section: APY on left, Rewards on right */}
+            <div className="mt-4 flex flex-row items-stretch justify-between gap-4">
+              {/* APY card */}
+              <div className="flex grow flex-col rounded-md border border-divider bg-[#FBFBF8] p-4">
+                <div className="flex flex-row items-center justify-between text-secondary">
+                  <span className="text-xs font-medium">APY</span>
+                  {/* Info icon, if desired */}
+                </div>
+                <div className="mt-1 text-3xl font-bold text-black">
+                  {apy ? `${parseFloat(apy).toFixed(2)}%` : "0%"}
+                </div>
+              </div>
+
+              {/* Rewards card */}
+              <div className="flex grow flex-col rounded-md border border-divider bg-[#FBFBF8] p-4">
+                <div className="flex flex-row items-center justify-between text-secondary">
+                  <span className="text-xs font-medium">Rewards</span>
+                  {/* Info icon, if desired */}
+                </div>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {reward_assets.length > 0
+                    ? reward_assets.map((asset: string, index: number) => (
+                        <div
+                          key={index}
+                          className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-600"
+                        >
+                          {asset}
+                        </div>
+                      ))
+                    : "--"}
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-secondary">
-              <span className="font-medium">Owner:</span> {owner || "N/A"}
-            </div>
-            <div className="text-sm text-secondary">
-              <span className="font-medium">Partner:</span> {partner || "N/A"}
-            </div>
-            <div className="mt-2 text-sm text-secondary">
-              <span className="font-medium">Base Asset:</span>{" "}
-              {base_asset || "Unknown"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">APY:</span> {apy ? `${apy}%` : "0%"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">TVL:</span>{" "}
-              {tvl
-                ? `$${parseFloat(tvl).toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                  })}`
-                : "--"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Active:</span>{" "}
-              {active ? "Yes" : "No"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Capacity:</span>{" "}
-              {capacity
-                ? `$${parseFloat(capacity).toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                  })}`
-                : "--"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Accepted Asset:</span>{" "}
-              {accepted_asset || "--"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Underlying Contract:</span>{" "}
-              {underlying_contract || "--"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Reward Assets:</span>{" "}
-              {reward_assets && reward_assets.length > 0
-                ? reward_assets.join(", ")
-                : "--"}
-            </div>
-            <div className="mt-1 text-sm text-secondary">
-              <span className="font-medium">Fee Structure:</span>{" "}
-              {fee_structure && fee_structure.length > 0
-                ? fee_structure
-                    .map((feeObj: any) => {
-                      const mgmt = feeObj.management_fee || "N/A";
-                      const perf = feeObj.performance_fee || "N/A";
-                      return `Mgmt: ${mgmt}, Perf: ${perf}`;
-                    })
-                    .join(" | ")
-                : "--"}
+
+            {/* Bottom row: capacity usage, active status */}
+            <div className="mt-4 flex flex-row items-center justify-between border-t border-divider pt-3 text-sm text-secondary">
+              {/* Capacity bar + text */}
+              <div className="flex flex-row items-center space-x-3">
+                <div className="relative h-2 w-24 rounded-full bg-gray-200">
+                  <div
+                    className="absolute left-0 top-0 h-full rounded-full bg-gray-500"
+                    style={{ width: `${usedCapacityPercent}%` }}
+                  />
+                </div>
+                <div className="text-black">{capacityDisplay}</div>
+              </div>
+
+              {/* Active or not */}
+              <div className="flex items-center space-x-1">
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    active ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
+                <span className="text-black">{active ? "Active" : "Inactive"}</span>
+              </div>
             </div>
           </div>
         );
